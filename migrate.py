@@ -124,12 +124,12 @@ class EventManager:
                 "fieldNames":[],
                 "sql": []
             }
-        self.eventlogProcess = open(eventlog, "wb+")
         self.sheetObject = None
         self.readLimit = None
         self.targetCursor = None
         self.targetTable = None
         self.SQLInsertTemplate = 'INSERT INTO %s (%s) VALUES (%s)'
+        self.eventlogProcess = None
 
     def update_target_table(self, table):
         self.targetTable = table
@@ -154,7 +154,9 @@ class EventManager:
         self.readLimit = max_row
 
     def log(self):
+        self.eventlogProcess = open(eventlog, "wb+")
         self.eventlogProcess.write(json.dumps(self.realtimeLog))
+        self.eventlogProcess.close()
 
     def run(self):
         if self.targetTable and self.sheetObject and self.readLimit and self.targetCursor and self.realtimeLog["columnList"] and self.realtimeLog["fieldNames"]:
@@ -176,7 +178,6 @@ class EventManager:
 
     def shutdown(self):
         self.log()
-        self.eventlogProcess.close()
 
 # create and update migration event manager
 currentEvents = EventManager()
