@@ -9,7 +9,9 @@ import json
 import sys
 import snowflake.connector
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+from time import sleep
+
+RATE_LIMIT_DELAY_SECS = 3
 
 # determine script location and adjust for Operating System
 THIS_DIR = os.getcwd()  
@@ -103,9 +105,11 @@ ctx = snowflake.connector.connect(
 cs = ctx.cursor()
 
 # connect to your Google Sheet
-scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
-credsGS = ServiceAccountCredentials.from_json_keyfile_name(googlesheets_creds_file, scope)
-client = gspread.authorize(credsGS)
+scope = [
+    'https://spreadsheets.google.com/feeds',
+    'https://www.googleapis.com/auth/drive'
+]
+client = gspread.service_account(filename='googlesheets.json')
 GoogleSheet = client.open(googlesheets_target_sheet).sheet1
 
 # your events log
@@ -155,22 +159,27 @@ class EventManager:
 
     def log(self):
         self.eventlogProcess = open(eventlog, "wb+")
-        self.eventlogProcess.write(json.dumps(self.realtimeLog))
+        self.eventlogProcess.write(json.dumps(self.realtimeLog).encode())
         self.eventlogProcess.close()
 
     def run(self):
         if self.targetTable and self.sheetObject and self.readLimit and self.targetCursor and self.realtimeLog["columnList"] and self.realtimeLog["fieldNames"]:
             writes = 0
-            while self.readLimit > self.realtimeLog["onRow"]:
+            EOF = False
+            while self.readLimit > self.realtimeLog["onRow"] and not EOF:
                 self.realtimeLog["onRow"]+=1
                 values = ",".join([apply_type(self.sheetObject.acell("%s%s" % (
                     column, self.realtimeLog["onRow"])).value) for column in self.realtimeLog["columnList"]])
                 sql = self.SQLInsertTemplate % ("%s.%s.%s" % (snowflake_target_database, snowflake_target_schema, self.targetTable), ",".join(self.realtimeLog["fieldNames"]), values)
-                self.targetCursor.execute(sql)
-                self.realtimeLog["sql"].append(sql)
-                self.log()
-                writes+=1
-                print("200 OK on Write #%s - Query: %s" % (writes, sql))
+                if 'None' in sql:
+                    EOF = True
+                else:
+                    self.targetCursor.execute(sql)
+                    self.realtimeLog["sql"].append(sql)
+                    self.log()
+                    writes+=1
+                    print("200 OK on Write #%s - Query: %s" % (writes, sql))
+                    sleep(RATE_LIMIT_DELAY_SECS)
             self.shutdown()
         else:
             print("Error: please provide required command line arguments to begin")
