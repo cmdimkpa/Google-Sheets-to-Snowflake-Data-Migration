@@ -27,5 +27,11 @@ migrate.py: the following arguments are required: --target-sheet-name, --columns
 
 ## Example
 
+```
+python3 migrate.py --target-sheet-name data-uplink-logs --columns-to-read A,B,C,D --max-rows-to-copy 26 
+--target-warehouse COMPUTE_WH --target-database TEST_GSHEET_MIGRATION --target-table GSHEETS_MIGRATION 
+--target-schema PUBLIC --target-field-names CLIENT_ID,NETWORK_TYPE,BYTES,UNIX_TIMESTAMP --target-role SYSADMIN
+```
+
 ## Screenshots
 
