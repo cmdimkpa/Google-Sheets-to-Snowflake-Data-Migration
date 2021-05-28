@@ -170,8 +170,12 @@ class EventManager:
                 CONCURRENT_WRITE_LIMIT = CONCURRENT_WRITE_LIMIT_MAX if remaining_rows >= CONCURRENT_WRITE_LIMIT_MAX else remaining_rows
                 self.SQLInsertTemplate = 'INSERT INTO %s (%s) VALUES ' + ','.join(['(%s)' for i in range(CONCURRENT_WRITE_LIMIT)])
                 self.realtimeLog["onRow"] += 1
-                values = ",".join([apply_type(self.sheetObject.acell("%s%s" % (
+                try:
+                    values = ",".join([apply_type(self.sheetObject.acell("%s%s" % (
                     column, self.realtimeLog["onRow"])).value) for column in self.realtimeLog["columnList"]])
+                except:
+                    print("Error: Google Rate Limit triggered. Try again after some time.")
+                    self.shutdown()
                 values_tuple += (values,)
                 if self.realtimeLog["onRow"] % CONCURRENT_WRITE_LIMIT == 0 or remaining_rows <= CONCURRENT_WRITE_LIMIT:
                     try:
