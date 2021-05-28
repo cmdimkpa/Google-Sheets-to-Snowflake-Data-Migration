@@ -35,3 +35,6 @@ python3 migrate.py --target-sheet-name data-uplink-logs --columns-to-read A,B,C,
 
 ## Screenshots
 
+<img width="1188" alt="Screenshot 2021-05-28 at 06 04 26" src="https://user-images.githubusercontent.com/26833356/119932146-a62fd500-bf7a-11eb-84d4-8f045079fb7a.png">
+
+<img width="1116" alt="Screenshot 2021-05-28 at 06 06 08" src="https://user-images.githubusercontent.com/26833356/119932285-df684500-bf7a-11eb-9d97-a84b04872bbc.png">
