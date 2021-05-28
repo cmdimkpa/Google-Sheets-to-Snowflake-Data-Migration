@@ -2,6 +2,12 @@
 
 Featured in: https://hevodata.com/blog/google-sheets-to-snowflake/
 
+## Requirements
+
+- You will need to provide credentials in the two JSON files in the project root. You can fill in the Snowflake credentials but you should download and rename the Google credentials. The article in the link above provides more information on how to go about this.
+- Ensure that your Google project has enabled both the Google Drive API and the Google Sheets API.
+- Also ensure that you have shared the Google Sheet you want to copy with your service account email. 
+
 ## Updates - May 2021
 
 The software was recently updated to:
