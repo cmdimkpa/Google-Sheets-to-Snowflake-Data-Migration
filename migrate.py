@@ -179,6 +179,8 @@ class EventManager:
                     self.shutdown()
                 if not (writes == 0 and args.skip_first_row):
                     values_tuple += (values,)
+                else:
+                    args.skip_first_row = False
                 if self.realtimeLog["onRow"] % CONCURRENT_WRITE_LIMIT == 0 or remaining_rows <= CONCURRENT_WRITE_LIMIT:
                     try:
                         use_tuple = query_tuple + values_tuple
