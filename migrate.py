@@ -39,6 +39,7 @@ def parse_csv(text, description):
 
 parser.add_argument('--rate-limit-delay', type=int, default=2.7, help='Seconds to wait before reading next row from Google Sheets API')
 parser.add_argument('--max-concurrent-write', type=int, default=10, help='Number of rows to write to Snowflake at once')
+parser.add_argument('--skip-first-row', type=bool, default=False, help='Option to skip the first row in your source data sheet')
 parser.add_argument('--target-sheet-name', type=str, required=True, help='GOOGLESHEETS_TARGET_SHEET')
 parser.add_argument('--columns-to-read', type=str, required=True, help='GOOGLESHEETS_READ_COLS (comma separated)')
 parser.add_argument('--max-rows-to-copy', type=int, required=True, help='GOOGLESHEETS_MAX_ROW')
@@ -176,7 +177,8 @@ class EventManager:
                 except:
                     print("Error: Google Rate Limit triggered. Try again after some time.")
                     self.shutdown()
-                values_tuple += (values,)
+                if not (writes == 0 and args.skip_first_row):
+                    values_tuple += (values,)
                 if self.realtimeLog["onRow"] % CONCURRENT_WRITE_LIMIT == 0 or remaining_rows <= CONCURRENT_WRITE_LIMIT:
                     try:
                         use_tuple = query_tuple + values_tuple
